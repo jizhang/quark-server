@@ -13,9 +13,7 @@ def create_app() -> Flask:
 
     db.init_app(app)
 
-    @app.route('/')
-    def hello():
-        from sqlalchemy import text
-        return str(db.session.execute(text('SELECT COUNT(*) FROM account')).scalar())
+    from .views import account
+    app.register_blueprint(account.bp)
 
     return app
