@@ -1,16 +1,12 @@
-from flask import Blueprint, Response
+from flask import Blueprint, Response, jsonify
 
-from quark import db
-from quark.models.account import Account
+from quark.services import account as account_svc
+from quark.utils import rows_to_list
 
-bp = Blueprint('account', __name__, url_prefix='/account')
+bp = Blueprint('account', __name__, url_prefix='/api/account')
 
 
 @bp.route('/list')
 def account_list() -> Response:
-    rows = db.session.query(Account).\
-        filter_by(user_id=1).\
-        order_by(Account.order_num.asc()).\
-        all()
-
-    return str(len(rows))
+    rows = account_svc.get_account_list(1)
+    return jsonify(data=rows_to_list(rows))
