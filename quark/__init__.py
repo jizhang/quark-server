@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, Response, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 from . import default_settings
@@ -13,6 +13,16 @@ def create_app() -> Flask:
 
     db.init_app(app)
 
+
+    @app.errorhandler(AppError)
+    def handle_app_error(e: AppError) -> Response:
+        payload = {
+            'code': e.code,
+            'message': e.message,
+        }
+        return jsonify(payload), 400
+
+
     from .views import account
     app.register_blueprint(account.bp)
 
@@ -20,4 +30,7 @@ def create_app() -> Flask:
 
 
 class AppError(Exception):
-    pass
+    def __init__(self, message: str, code=400):
+        super().__init__(message)
+        self.message = message
+        self.code = code

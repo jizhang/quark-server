@@ -18,7 +18,7 @@ def account_list() -> Response:
 
 @bp.route('/save', methods=['POST'])
 def account_save() -> Response:
-    form = request.json()
+    form = request.get_json()
     user_id = 1
 
     if 'id' in form:
