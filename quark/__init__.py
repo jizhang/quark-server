@@ -17,3 +17,7 @@ def create_app() -> Flask:
     app.register_blueprint(account.bp)
 
     return app
+
+
+class AppError(Exception):
+    pass
