@@ -6,6 +6,7 @@ create table account (
   ,initial_balance decimal(20, 2) default 0
   ,balance decimal(20, 2) default 0
   ,order_num int not null default 0
+  ,is_deleted tinyint not null default 0
   ,created_at datetime not null
   ,updated_at timestamp not null default current_timestamp on update current_timestamp
   ,index idx_user_name (user_id, `name`)

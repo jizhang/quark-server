@@ -6,21 +6,29 @@ from flask import Blueprint, Response, jsonify, request
 from quark import db, AppError
 from quark.models.account import Account
 from quark.services import account as account_svc
-from quark.utils import rows_to_list
+from quark.utils import row_to_dict, rows_to_list
 
 bp = Blueprint('account', __name__, url_prefix='/api/account')
+
+USER_ID = 1
 
 
 @bp.route('/list')
 def account_list() -> Response:
-    rows = account_svc.get_account_list(1)
+    rows = account_svc.get_account_list(USER_ID)
     return jsonify(data=rows_to_list(rows))
+
+
+@bp.route('/get')
+def account_get() -> Response:
+    account = check_account_id(USER_ID, request.args.get('id'))
+    return jsonify(account=row_to_dict(account))
 
 
 @bp.route('/save', methods=['POST'])
 def account_save() -> Response:
     form = request.get_json()
-    user_id = 1
+    user_id = USER_ID
 
     if not isinstance(form, dict):
         raise AppError('Invalid request body')
@@ -46,11 +54,24 @@ def account_save() -> Response:
         account.initial_balance = check_initial_balance(form)
         account.balance = account.initial_balance
         account.order_num = account_svc.get_max_order_num(user_id) + 10
+        account.is_deleted = 0
         account.created_at = datetime.now()
 
         db.session.add(account)
         db.session.flush()
 
+    account_id = account.id
+    db.session.commit()
+    return jsonify(id=account_id)
+
+
+@bp.route('/delete', methods=['POST'])
+def account_delete() -> Response:
+    account = check_account_id(USER_ID, request.json.get('id'))
+
+    # TODO Check records.
+
+    account.is_deleted = 1
     account_id = account.id
     db.session.commit()
     return jsonify(id=account_id)

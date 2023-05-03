@@ -9,5 +9,6 @@ class Account(db.Model):
     initial_balance = db.Column(db.Numeric)
     balance = db.Column(db.Numeric)
     order_num = db.Column(db.Integer)
+    is_deleted = db.Column(db.Integer)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
