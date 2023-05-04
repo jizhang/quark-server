@@ -2,6 +2,7 @@ from decimal import Decimal
 from datetime import datetime
 
 from flask import Blueprint, Response, jsonify, request
+from flask_login import login_required, current_user
 
 from quark import db, AppError
 from quark.models.account import Account
@@ -10,25 +11,26 @@ from quark.utils import row_to_dict, rows_to_list
 
 bp = Blueprint('account', __name__, url_prefix='/api/account')
 
-USER_ID = 1
-
 
 @bp.route('/list')
+@login_required
 def account_list() -> Response:
-    rows = account_svc.get_account_list(USER_ID)
+    rows = account_svc.get_account_list(current_user.id)
     return jsonify(data=rows_to_list(rows))
 
 
 @bp.route('/get')
+@login_required
 def account_get() -> Response:
-    account = check_account_id(USER_ID, request.args.get('id'))
+    account = check_account_id(current_user.id, request.args.get('id'))
     return jsonify(account=row_to_dict(account))
 
 
 @bp.route('/save', methods=['POST'])
+@login_required
 def account_save() -> Response:
     form = request.get_json()
-    user_id = USER_ID
+    user_id = current_user.id
 
     if not isinstance(form, dict):
         raise AppError('Invalid request body')
@@ -66,8 +68,9 @@ def account_save() -> Response:
 
 
 @bp.route('/delete', methods=['POST'])
+@login_required
 def account_delete() -> Response:
-    account = check_account_id(USER_ID, request.json.get('id'))
+    account = check_account_id(current_user.id, request.json.get('id'))
 
     # TODO Check records.
 
