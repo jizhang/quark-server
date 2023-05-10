@@ -1,4 +1,3 @@
-from decimal import Decimal
 from datetime import datetime
 
 from flask import Blueprint, Response, jsonify, request
@@ -6,12 +5,13 @@ from flask_login import login_required, current_user
 from marshmallow import ValidationError
 
 from quark import db, AppError
-from quark.models.account import Account
 from quark.models.record import Record, RecordType
 from quark.services import account as account_svc
+from quark.services import category as category_svc
 from quark.services import record as record_svc
-from quark.utils import row_to_dict, rows_to_list
+from .record_item import RecordItemSchema
 from .record_form import record_form_schema
+from .record_request import record_request_schema
 
 bp = Blueprint('record', __name__, url_prefix='/api/record')
 
@@ -19,13 +19,26 @@ bp = Blueprint('record', __name__, url_prefix='/api/record')
 @bp.route('/list')
 @login_required
 def record_list() -> Response:
-    return jsonify(data=[])
+    records = record_svc.get_list(current_user.id)
+
+    schema = RecordItemSchema()
+    schema.context = {
+        'category_names': category_svc.get_name_mapping(current_user.id),
+        'account_names': account_svc.get_name_mapping(current_user.id),
+    }
+
+    return jsonify(data=schema.dump(records, many=True))
 
 
 @bp.route('/get')
 @login_required
 def record_get() -> Response:
-    raise AppError('Record not found')
+    try:
+        row = record_request_schema.load(request.args)
+    except ValidationError as e:
+        raise AppError(str(e.messages))
+
+    return jsonify(record_form_schema.dump(row))
 
 
 @bp.route('/save', methods=['POST'])
