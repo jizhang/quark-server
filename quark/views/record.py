@@ -11,6 +11,7 @@ from quark.services import category as category_svc
 from quark.services import record as record_svc
 from .record_item import RecordItemSchema
 from .record_form import record_form_schema
+from .record_request import record_request_schema
 
 bp = Blueprint('record', __name__, url_prefix='/api/record')
 
@@ -32,7 +33,12 @@ def record_list() -> Response:
 @bp.route('/get')
 @login_required
 def record_get() -> Response:
-    raise AppError('Record not found')
+    try:
+        row = record_request_schema.load(request.args)
+    except ValidationError as e:
+        raise AppError(str(e.messages))
+
+    return jsonify(record_form_schema.dump(row))
 
 
 @bp.route('/save', methods=['POST'])

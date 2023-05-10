@@ -19,6 +19,3 @@ class RecordItemSchema(Schema):
 
     def get_target_account_name(self, record):
         return self.context['account_names'].get(record.target_account_id)
-
-
-record_item_schema = RecordItemSchema()
