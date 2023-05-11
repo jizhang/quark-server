@@ -42,9 +42,10 @@ def configure_login_manager(app: Flask):
 
 
 def configure_views(app: Flask):
-    from .views import user, account, record
+    from .views import user, account, category, record
     app.register_blueprint(user.bp)
     app.register_blueprint(account.bp)
+    app.register_blueprint(category.bp)
     app.register_blueprint(record.bp)
 
 
