@@ -63,3 +63,18 @@ def record_save() -> Response:
     record_id = record.id
     db.session.commit()
     return jsonify(id=record_id)
+
+
+@bp.route('/delete', methods=['POST'])
+@login_required
+def record_delete() -> Response:
+    try:
+        record = record_request_schema.load(request.json)
+    except ValidationError as e:
+        raise AppError(str(e.messages))
+
+    record.is_deleted = 1
+    record_id = record.id
+    db.session.commit()
+
+    return jsonify(id=record_id)
