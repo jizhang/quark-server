@@ -7,6 +7,7 @@ from flask_login import login_required, current_user
 from quark import db, AppError
 from quark.models.account import Account
 from quark.services import account as account_svc
+from quark.services import record as record_svc
 from quark.utils import row_to_dict, rows_to_list
 
 bp = Blueprint('account', __name__, url_prefix='/api/account')
@@ -71,8 +72,8 @@ def account_save() -> Response:
 @login_required
 def account_delete() -> Response:
     account = check_account_id(current_user.id, request.json.get('id'))
-
-    # TODO Check records.
+    if record_svc.exists_by_account(current_user.id, account.id):
+        raise AppError('Account still has records.')
 
     account.is_deleted = 1
     account_id = account.id

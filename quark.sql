@@ -23,3 +23,30 @@ create table account (
   ,updated_at timestamp not null default current_timestamp on update current_timestamp
   ,index idx_user_name (user_id, `name`)
 );
+
+create table category (
+  id int not null primary key auto_increment
+  ,user_id int not null
+  ,`type` tinyint not null comment '1 Expense, 2 Income'
+  ,`name` varchar(255) not null
+  ,is_deleted tinyint not null default 0
+  ,created_at datetime not null
+  ,updated_at timestamp not null default current_timestamp on update current_timestamp
+  ,index idx_user (user_id)
+);
+
+create table record (
+  id bigint not null primary key auto_increment
+  ,user_id int not null
+  ,record_type tinyint not null comment '1 Expense, 2 Income, 3 Transfer'
+  ,category_id int not null default 0
+  ,account_id int not null
+  ,target_account_id int not null default 0
+  ,record_time datetime not null
+  ,amount decimal(20, 2) not null
+  ,remark varchar(255) not null default ''
+  ,is_deleted tinyint not null default 0
+  ,created_at datetime not null
+  ,updated_at timestamp not null default current_timestamp on update current_timestamp
+  ,index idx_user_time (user_id, record_time)
+);

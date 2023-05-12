@@ -34,6 +34,7 @@ def record_save() -> Response:
     if 'id' in form:
         record = record_svc.get_record(current_user.id, form['id'])
         assert record is not None  # Validated in form.
+        record_svc.undo_record(record)
 
     else:
         record = Record()
@@ -58,8 +59,9 @@ def record_save() -> Response:
 
     if not record.id:
         db.session.add(record)
+        db.session.flush()
 
-    db.session.flush()
+    record_svc.do_record(record)
     record_id = record.id
     db.session.commit()
     return jsonify(id=record_id)
@@ -73,6 +75,7 @@ def record_delete() -> Response:
     except ValidationError as e:
         raise AppError(str(e.messages))
 
+    record_svc.undo_record(record)
     record.is_deleted = 1
     record_id = record.id
     db.session.commit()
