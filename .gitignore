@@ -1,5 +1,7 @@
 # Python
 __pycache__
+/config.py
+/quark.log
 
 # IDE
 .vscode
