@@ -5,7 +5,7 @@ from quark.models.record import Record, RecordType
 from quark.services import account as account_svc
 
 
-def get_list(user_id: int, last_id=0, limit=100, account_id: Optional[int] = None) -> List[Record]:
+def get_list(user_id: int, last_id=0, limit=100_000, account_id: Optional[int] = None) -> List[Record]:
     query = db.session.query(Record).\
         filter_by(user_id=user_id, is_deleted=0).\
         filter(Record.id > last_id)
