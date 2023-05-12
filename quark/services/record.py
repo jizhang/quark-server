@@ -45,3 +45,10 @@ def undo_record(record: Record):
         target_account = account_svc.get_account(record.user_id, record.target_account_id)
         assert target_account is not None
         target_account.balance += record.amount
+
+
+def exists_by_account(user_id: int, account_id: int) -> bool:
+    row = db.session.query(Record.id).\
+        filter_by(user_id=user_id, account_id=account_id, is_deleted=0).\
+        first()
+    return row is not None
