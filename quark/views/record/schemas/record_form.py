@@ -1,5 +1,5 @@
 from flask_login import current_user
-from marshmallow import Schema, fields, validate, validates, validates_schema, ValidationError
+from marshmallow import Schema, fields, validate, validates, validates_schema, ValidationError, post_load, post_dump
 
 from quark.models.record import RecordType
 from quark.services import account as account_svc
@@ -39,8 +39,31 @@ class RecordFormSchema(Schema):
         if not form['target_account_id']:
             raise ValidationError('Target account cannot be empty.')
 
+        if form['account_id'] == form['target_account_id']:
+            raise ValidationError('Source and target account cannot be the same.')
+
         if account_svc.get_account(current_user.id, form['target_account_id']) is None:
             raise ValidationError('Target account not found')
+
+    @validates_schema
+    def validate_amount(self, form, **kwargs):
+        if form['record_type'] == RecordType.EXPENSE and form['amount'] < 0:
+            raise ValidationError('Expense amount cannot be negative.')
+
+        if form['record_type'] == RecordType.TRANSFER and form['amount'] < 0:
+            raise ValidationError('Transfer amount cannot be negative.')
+
+    @post_load
+    def load_amount(self, form, **kwargs):
+        if form['record_type'] in [RecordType.EXPENSE, RecordType.TRANSFER]:
+            form['amount'] = -form['amount']
+        return form
+
+    @post_dump
+    def update_amount(self, form, **kwargs):
+        if form['record_type'] in [RecordType.EXPENSE, RecordType.TRANSFER]:
+            form['amount'] = -form['amount']
+        return form
 
 
 record_form_schema = RecordFormSchema()
