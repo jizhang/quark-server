@@ -50,3 +50,13 @@ create table record (
   ,updated_at timestamp not null default current_timestamp on update current_timestamp
   ,index idx_user_time (user_id, record_time)
 );
+
+create table user_setting (
+  id int not null primary key auto_increment
+  ,user_id int not null
+  ,setting_key varchar(255) not null
+  ,setting_value_json varchar(255) not null
+  ,created_at datetime not null
+  ,updated_at timestamp not null default current_timestamp on update current_timestamp
+  ,unique key uk_user_setting (user_id, setting_key)
+);
