@@ -55,13 +55,13 @@ class RecordFormSchema(Schema):
 
     @post_load
     def load_amount(self, form, **kwargs):
-        if form['record_type'] in [RecordType.EXPENSE, RecordType.TRANSFER]:
+        if form['record_type'] == RecordType.EXPENSE:
             form['amount'] = -form['amount']
         return form
 
     @post_dump
     def update_amount(self, form, **kwargs):
-        if form['record_type'] in [RecordType.EXPENSE, RecordType.TRANSFER]:
+        if form['record_type'] == RecordType.EXPENSE:
             form['amount'] = -form['amount']
         return form
 

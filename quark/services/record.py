@@ -28,23 +28,29 @@ def get_record(user_id: int, record_id: int) -> Optional[Record]:
 def do_record(record: Record):
     account = account_svc.get_account(record.user_id, record.account_id)
     assert account is not None
-    account.balance += record.amount
 
     if record.record_type == RecordType.TRANSFER:
+        account.balance -= record.amount
         target_account = account_svc.get_account(record.user_id, record.target_account_id)
         assert target_account is not None
-        target_account.balance -= record.amount
+        target_account.balance += record.amount
+
+    else:
+        account.balance += record.amount
 
 
 def undo_record(record: Record):
     account = account_svc.get_account(record.user_id, record.account_id)
     assert account is not None
-    account.balance -= record.amount
 
     if record.record_type == RecordType.TRANSFER:
+        account.balance += record.amount
         target_account = account_svc.get_account(record.user_id, record.target_account_id)
         assert target_account is not None
-        target_account.balance += record.amount
+        target_account.balance -= record.amount
+
+    else:
+        account.balance -= record.amount
 
 
 def exists_by_account(user_id: int, account_id: int) -> bool:
