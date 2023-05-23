@@ -42,11 +42,12 @@ def configure_login_manager(app: Flask):
 
 
 def configure_views(app: Flask):
-    from .views import user, account, category, record
+    from .views import user, account, category, record, chart
     app.register_blueprint(user.bp)
     app.register_blueprint(account.bp)
     app.register_blueprint(category.bp)
     app.register_blueprint(record.bp)
+    app.register_blueprint(chart.bp)
 
 
 class AppError(Exception):

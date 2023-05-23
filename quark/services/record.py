@@ -1,4 +1,7 @@
 from typing import Optional, List
+from datetime import datetime
+
+from sqlalchemy import func
 
 from quark import db
 from quark.models.record import Record, RecordType
@@ -58,3 +61,9 @@ def exists_by_account(user_id: int, account_id: int) -> bool:
         filter_by(user_id=user_id, account_id=account_id, is_deleted=0).\
         first()
     return row is not None
+
+
+def get_min_date(user_id: int) -> Optional[datetime]:
+    return db.session.query(func.min(Record.record_time)).\
+        filter_by(user_id=user_id, is_deleted=0).\
+        scalar()

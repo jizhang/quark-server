@@ -25,3 +25,10 @@ def row_to_dict(row) -> dict:
 
 def rows_to_list(rows: Iterable) -> List[dict]:
     return [row_to_dict(i) for i in rows]
+
+
+def divide(a, b) -> float:
+    try:
+        return a / b
+    except Exception:
+        return 0.0
