@@ -7,49 +7,70 @@ from quark import db
 from quark.models.record import RecordType
 
 
-def get_category_chart(user_id: int, record_type: int, start_date: datetime, end_date: datetime) -> list:
+def get_category_chart(user_id: int, start_date: datetime, end_date: datetime) -> list:
     rows = db.session.execute(text(
         """
         SELECT
-            a.category_id
+            a.record_type
+            ,a.category_id
             ,b.name AS category_name
             ,SUM(a.amount) AS amount
         FROM record a
         JOIN category b ON a.category_id = b.id
         WHERE a.user_id = :user_id
-        AND a.record_type = :record_type
         AND a.record_time BETWEEN :start_date AND :end_date
-        GROUP BY a.category_id
+        GROUP BY a.record_type, a.category_id
         """
     ), {
         'user_id': user_id,
-        'record_type': record_type,
         'start_date': start_date,
         'end_date': end_date,
     }).fetchall()
 
-    data = []
-    total_amount = Decimal(0)
+    group_map = {
+        RecordType.EXPENSE: {
+            'id': RecordType.EXPENSE,
+            'name': 'Expense',
+            'amount': Decimal(0),
+            '_total_amount': Decimal(0),
+            'categories': [],
+        },
+        RecordType.INCOME: {
+            'id': RecordType.INCOME,
+            'name': 'Income',
+            'amount': Decimal(0),
+            '_total_amount': Decimal(0),
+            'categories': [],
+        }
+    }
     for row in rows:
-        if record_type == RecordType.EXPENSE and row.amount != 0:
+        group = group_map.get(row.record_type)
+        if group is None:
+            continue
+
+        if row.record_type == RecordType.EXPENSE and row.amount != 0:
+            group['amount'] += -row.amount
             amount = -row.amount
+
         else:
+            group['amount'] += row.amount
             amount = row.amount
 
         if amount > 0:
-            total_amount += amount
+            group['_total_amount'] += amount
 
-        data.append({
-            'category_id': row.category_id,
-            'category_name': row.category_name,
+        group['categories'].append({
+            'id': row.category_id,
+            'name': row.category_name,
             'amount': amount,
             'percent': 0.0,
         })
 
-    if total_amount > 0:
-        for item in data:
-            if item['amount'] > 0:
-                item['percent'] = item['amount'] / total_amount
+    for group in group_map.values():
+        if group['_total_amount'] > 0:
+            for item in group['categories']:
+                if item['amount'] > 0:
+                    item['percent'] = item['amount'] / group['_total_amount']
+        group['categories'].sort(key=lambda x: x['amount'], reverse=True)
 
-    data.sort(key=lambda x: x['amount'], reverse=True)
-    return data
+    return list(group_map.values())

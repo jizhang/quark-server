@@ -31,6 +31,5 @@ def chart_category() -> Response:
 
     start_date = form['month']
     end_date = start_date + relativedelta(day=31)
-    data = chart_svc.get_category_chart(current_user.id, form['type'], start_date, end_date)
-
-    return category_chart_response_schema.dump({'data': data})
+    groups = chart_svc.get_category_chart(current_user.id, start_date, end_date)
+    return category_chart_response_schema.dump({'groups': groups})

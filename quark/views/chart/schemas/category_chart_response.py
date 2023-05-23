@@ -1,15 +1,22 @@
 from marshmallow import Schema, fields
 
 
-class ChartItemSchema(Schema):
-    category_id = fields.Int()
-    category_name = fields.Str()
+class CategorySchema(Schema):
+    id = fields.Int()
+    name = fields.Str()
     amount = fields.Decimal()
     percent = fields.Float()
 
 
+class GroupSchema(Schema):
+    id = fields.Int()
+    name = fields.Str()
+    amount = fields.Decimal()
+    categories = fields.Nested(CategorySchema, many=True)
+
+
 class CategoryChartResponseSchema(Schema):
-    data = fields.Nested(ChartItemSchema, many=True)
+    groups = fields.Nested(GroupSchema, many=True)
 
 
 category_chart_response_schema = CategoryChartResponseSchema()

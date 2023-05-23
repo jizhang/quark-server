@@ -2,7 +2,7 @@ from marshmallow import Schema, fields, validate
 
 
 class CategoryChartRequestSchema(Schema):
-    type = fields.Int(required=True, validate=validate.OneOf([1, 2]))
+    type = fields.Str()
     month = fields.DateTime(required=True, format='%Y%m')
 
 
