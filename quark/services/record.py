@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, TypedDict
 from datetime import datetime
 
 from sqlalchemy import func
@@ -8,17 +8,27 @@ from quark.models.record import Record, RecordType
 from quark.services import account as account_svc
 
 
-def get_list(user_id: int, last_id=0, limit=100_000, account_id: Optional[int] = None) -> List[Record]:
+class ListParams(TypedDict):
+    record_type: int
+    account_id: int
+    last_id: int
+    limit: int
+
+
+def get_list(user_id: int, params: ListParams) -> List[Record]:
     query = db.session.query(Record).\
         filter_by(user_id=user_id, is_deleted=0).\
-        filter(Record.id > last_id)
+        filter(Record.id > params['last_id'])
 
-    if account_id is not None:
-        query = query.filter_by(account_id=account_id)
+    if 'record_type' in params:
+        query = query.filter_by(record_type=params['record_type'])
+
+    if 'account_id' in params:
+        query = query.filter_by(account_id=params['account_id'])
 
     return query.\
         order_by(Record.record_time.desc()).\
-        limit(limit).\
+        limit(params['limit']).\
         all()
 
 
