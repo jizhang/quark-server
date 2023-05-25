@@ -3,13 +3,13 @@ from datetime import datetime
 from flask import request, Response, jsonify
 from flask_login import login_required, current_user
 from marshmallow import ValidationError
-from dateutil.relativedelta import relativedelta
 
 from quark import AppError
 from quark.services import record as record_svc, chart as chart_svc
 from . import bp
 from .schemas.category_chart_request import category_chart_request_schema
 from .schemas.category_chart_response import category_chart_response_schema
+from .schemas.investment_chart_response import investment_chart_response_schema
 
 
 @bp.get('/min-date')
@@ -29,7 +29,17 @@ def chart_category() -> Response:
     except ValidationError as e:
         raise AppError(str(e.messages))
 
-    start_date = form['month']
-    end_date = start_date + relativedelta(day=31)
-    groups = chart_svc.get_category_chart(current_user.id, start_date, end_date)
+    groups = chart_svc.get_category_chart(current_user.id, form['start_date'], form['end_date'])
     return category_chart_response_schema.dump({'groups': groups})
+
+
+@bp.get('/investment')
+@login_required
+def chart_investment() -> Response:
+    try:
+        form = category_chart_request_schema.load(request.args)
+    except ValidationError as e:
+        raise AppError(str(e.messages))
+
+    payload = chart_svc.get_investment_chart(current_user.id, form['start_date'], form['end_date'])
+    return investment_chart_response_schema.dump(payload)
