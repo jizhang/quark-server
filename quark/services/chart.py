@@ -26,6 +26,7 @@ def get_category_chart(user_id: int, start_date: datetime, end_date: datetime) -
         JOIN category b ON a.category_id = b.id
         WHERE a.user_id = :user_id
         AND a.record_time BETWEEN :start_time AND :end_time
+        AND a.is_deleted = 0
         GROUP BY a.record_type, a.category_id
         """
     ), params).fetchall()
@@ -98,6 +99,7 @@ def get_investment_chart(user_id: int, start_date: datetime, end_date: datetime)
         WHERE a.user_id = :user_id
         AND a.record_time BETWEEN :start_time AND :end_time
         AND b.name = :category_name
+        AND a.is_deleted = 0
         GROUP BY a.account_id
         """
     ), params).fetchall()
