@@ -5,6 +5,7 @@ from quark.models.record import RecordType
 
 class RecordListRequestSchema(Schema):
     record_type = fields.Int(validate=validate.OneOf(RecordType.all()))
+    category_id = fields.Int()
     account_id = fields.Int()
     last_id = fields.Int(load_default=0)
     limit = fields.Int(load_default=10_000)

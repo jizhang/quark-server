@@ -10,6 +10,7 @@ from quark.services import account as account_svc
 
 class ListParams(TypedDict):
     record_type: int
+    category_id: int
     account_id: int
     last_id: int
     limit: int
@@ -22,6 +23,9 @@ def get_list(user_id: int, params: ListParams) -> List[Record]:
 
     if 'record_type' in params:
         query = query.filter_by(record_type=params['record_type'])
+
+    if 'category_id' in params:
+        query = query.filter_by(category_id=params['category_id'])
 
     if 'account_id' in params:
         query = query.filter_by(account_id=params['account_id'])
