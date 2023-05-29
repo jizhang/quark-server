@@ -9,6 +9,8 @@ class AccountSchema(Schema):
 
 
 class InvestmentChartResponseSchema(Schema):
+    record_type = fields.Int()
+    category_id = fields.Int()
     total = fields.Decimal()
     accounts = fields.Nested(AccountSchema, many=True)
 

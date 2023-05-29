@@ -5,8 +5,7 @@ from sqlalchemy import text
 
 from quark import db
 from quark.models.record import RecordType
-
-INVESTMENT_CATEGORY = 'Investment'
+from quark.services import category as category_svc
 
 
 def get_category_chart(user_id: int, start_date: datetime, end_date: datetime) -> list:
@@ -81,9 +80,18 @@ def get_category_chart(user_id: int, start_date: datetime, end_date: datetime) -
 
 
 def get_investment_chart(user_id: int, start_date: datetime, end_date: datetime) -> dict:
+    category = category_svc.find_investment_category(user_id)
+    if category is None:
+        return {
+            'record_type': RecordType.INCOME,
+            'category_id': 0,
+            'total': Decimal(0),
+            'accounts': [],
+        }
+
     params = {
         'user_id': user_id,
-        'category_name': INVESTMENT_CATEGORY,
+        'category_id': category.id,
     }
     params.update(get_time_range(start_date, end_date))
 
@@ -91,14 +99,13 @@ def get_investment_chart(user_id: int, start_date: datetime, end_date: datetime)
         """
         SELECT
             a.account_id
-            ,c.name AS account_name
+            ,b.name AS account_name
             ,SUM(a.amount) AS amount
         FROM record a
-        JOIN category b ON a.category_id = b.id
-        JOIN account c ON a.account_id = c.id
+        JOIN account b ON a.account_id = b.id
         WHERE a.user_id = :user_id
         AND a.record_time BETWEEN :start_time AND :end_time
-        AND b.name = :category_name
+        AND a.category_id = :category_id
         AND a.is_deleted = 0
         GROUP BY a.account_id
         """
@@ -127,6 +134,8 @@ def get_investment_chart(user_id: int, start_date: datetime, end_date: datetime)
     accounts.sort(key=lambda x: x['amount'], reverse=True)
 
     return {
+        'record_type': category.type,
+        'category_id': category.id,
         'total': total,
         'accounts': accounts,
     }
