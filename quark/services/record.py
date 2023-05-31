@@ -1,7 +1,7 @@
 from typing import Optional, List, TypedDict
 from datetime import datetime
 
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from quark import db
 from quark.models.record import Record, RecordType
@@ -28,7 +28,10 @@ def get_list(user_id: int, params: ListParams) -> List[Record]:
         query = query.filter_by(category_id=params['category_id'])
 
     if 'account_id' in params:
-        query = query.filter_by(account_id=params['account_id'])
+        query = query.filter(or_(
+            Record.account_id == params['account_id'],
+            Record.target_account_id == params['account_id']
+        ))
 
     return query.\
         order_by(Record.record_time.desc()).\
