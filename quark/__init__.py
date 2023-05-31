@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional, Tuple
 
 from flask import Flask, Response, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -6,7 +6,7 @@ from flask_login import LoginManager
 
 from . import default_settings
 
-db = SQLAlchemy()
+db: Any = SQLAlchemy()
 login_manager = LoginManager()
 
 
@@ -20,7 +20,7 @@ def create_app() -> Flask:
     configure_views(app)
 
     @app.errorhandler(AppError)
-    def handle_app_error(e: AppError) -> Response:
+    def handle_app_error(e: AppError) -> Tuple[Response, int]:
         payload = {
             'code': e.code,
             'message': e.message,
