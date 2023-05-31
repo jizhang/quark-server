@@ -44,6 +44,5 @@ target-version = "py310"
 [[tool.mypy.overrides]]
 module = [
     "flask_login",
-    # "flask_sqlalchemy",
 ]
 ignore_missing_imports = true
