@@ -8,6 +8,7 @@ web:
 
 test:
 	poetry run ruff quark
+	poetry run mypy quark
 
 prod:
 	poetry install --extras gunicorn --without dev

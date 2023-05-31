@@ -6,19 +6,25 @@ from marshmallow import ValidationError
 from quark import db, AppError
 from quark.services import user as user_svc
 from . import bp
+from .schemas.login_form import login_form_schema
 from .schemas.user_setting import user_setting_schema
 
 
 @bp.route('/login', methods=['POST'])
 def user_login() -> Response:
-    user = user_svc.get_by_username(request.json['username'])
+    try:
+        form = login_form_schema.load(request.json)  # type: ignore
+    except ValidationError as e:
+        raise AppError(str(e.messages))
+
+    user = user_svc.get_by_username(form['username'])
     if user is None:
         raise AppError('Username not found')
 
-    if not check_password_hash(user.password, request.json['password']):
+    if not check_password_hash(user.password, form['password']):
         raise AppError('Invalid password')
 
-    login_user(user, remember=(request.json['remember_me'] == '1'))
+    login_user(user, remember=(form['remember_me'] == '1'))
 
     return jsonify(id=user.id, username=user.username)
 
@@ -32,7 +38,7 @@ def user_setting_get() -> Response:
 @bp.route('/setting/save', methods=['POST'])
 def user_setting_save() -> Response:
     try:
-        form = user_setting_schema.load(request.json)
+        form = user_setting_schema.load(request.json)  # type: ignore
     except ValidationError as e:
         raise AppError(str(e.messages))
 

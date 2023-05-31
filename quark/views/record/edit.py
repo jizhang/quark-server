@@ -27,7 +27,7 @@ def record_get() -> Response:
 @login_required
 def record_save() -> Response:
     try:
-        form = record_form_schema.load(request.json)
+        form = record_form_schema.load(request.json)  # type: ignore
     except ValidationError as e:
         raise AppError(str(e.messages))
 
@@ -71,7 +71,7 @@ def record_save() -> Response:
 @login_required
 def record_delete() -> Response:
     try:
-        record = record_request_schema.load(request.json)
+        record = record_request_schema.load(request.json)  # type: ignore
     except ValidationError as e:
         raise AppError(str(e.messages))
 

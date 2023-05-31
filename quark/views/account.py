@@ -71,6 +71,9 @@ def account_save() -> Response:
 @bp.route('/delete', methods=['POST'])
 @login_required
 def account_delete() -> Response:
+    if request.json is None:
+        raise AppError('Invalid request body')
+
     account = check_account_id(current_user.id, request.json.get('id'))
     if record_svc.exists_by_account(current_user.id, account.id):
         raise AppError('Account still has records.')

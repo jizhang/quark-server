@@ -1,3 +1,4 @@
+from typing import Dict
 from decimal import Decimal
 from datetime import datetime
 
@@ -30,7 +31,7 @@ def get_category_chart(user_id: int, start_date: datetime, end_date: datetime) -
         """
     ), params).fetchall()
 
-    group_map = {
+    group_map: Dict[int, dict] = {
         RecordType.EXPENSE: {
             'id': RecordType.EXPENSE,
             'name': 'Expense',
@@ -46,6 +47,7 @@ def get_category_chart(user_id: int, start_date: datetime, end_date: datetime) -
             'categories': [],
         }
     }
+
     for row in rows:
         group = group_map.get(row.record_type)
         if group is None:
