@@ -11,7 +11,7 @@ class RecordFormSchema(Schema):
     id = fields.Int()
     record_type = fields.Int(required=True, validate=validate.OneOf(RecordType.all()))
     category_id = fields.Int()
-    account_id = fields.Int(required=True)
+    account_id = fields.Int(required=True)  # TODO Validate account
     target_account_id = fields.Int()
     record_time = fields.DateTime(required=True)
     amount = fields.Decimal(required=True)

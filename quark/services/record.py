@@ -30,7 +30,7 @@ def get_list(user_id: int, params: ListParams) -> List[Record]:
     if 'account_id' in params:
         query = query.filter(or_(
             Record.account_id == params['account_id'],
-            Record.target_account_id == params['account_id']
+            Record.target_account_id == params['account_id'],
         ))
 
     return query.\
@@ -75,7 +75,11 @@ def undo_record(record: Record):
 
 def exists_by_account(user_id: int, account_id: int) -> bool:
     row = db.session.query(Record.id).\
-        filter_by(user_id=user_id, account_id=account_id, is_deleted=0).\
+        filter_by(user_id=user_id, is_deleted=0).\
+        filter(or_(
+            Record.account_id == account_id,
+            Record.target_account_id == account_id,
+        )).\
         first()
     return row is not None
 
