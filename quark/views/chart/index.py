@@ -10,6 +10,8 @@ from . import bp
 from .schemas.category_chart_request import category_chart_request_schema
 from .schemas.category_chart_response import category_chart_response_schema
 from .schemas.investment_chart_response import investment_chart_response_schema
+from .schemas.net_capital_chart_request import net_capital_chart_request_schema
+from .schemas.net_capital_chart_response import net_capital_chart_response_schema
 
 
 @bp.get('/min-date')
@@ -43,3 +45,15 @@ def chart_investment() -> Response:
 
     payload = chart_svc.get_investment_chart(current_user.id, form['start_date'], form['end_date'])
     return investment_chart_response_schema.dump(payload)
+
+
+@bp.get('/net-capital')
+@login_required
+def chart_net_capital() -> Response:
+    try:
+        form = net_capital_chart_request_schema.load(request.args)
+    except ValidationError as e:
+        raise AppError(str(e.messages))
+
+    data = chart_svc.get_net_capital_chart(current_user.id, form['start_date'], form['end_date'])
+    return net_capital_chart_response_schema.dump({'data': data})
