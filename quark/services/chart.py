@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Tuple, Dict
 from decimal import Decimal
 from datetime import datetime
 
@@ -201,6 +201,82 @@ def get_net_capital_chart(user_id: int, start_date: datetime, end_date: datetime
         current_date += relativedelta(months=1)
 
     return result
+
+
+def get_expense_chart(user_id: int, record_type: int,
+                      start_date: datetime, end_date: datetime) -> dict:
+    params = {
+        'user_id': user_id,
+        'record_type': record_type,
+        'amount_sign': -1 if record_type == RecordType.EXPENSE else 1,
+    }
+    params.update(get_time_range(start_date, end_date))
+
+    rows = db.session.execute(text(
+        """
+        SELECT
+            DATE_FORMAT(a.record_time, '%Y%m') AS `month`
+            ,a.category_id
+            ,MAX(b.name) AS category_name
+            ,SUM(a.amount) * :amount_sign AS `amount`
+        FROM record a
+        JOIN category b ON a.category_id = b.id
+        WHERE a.user_id = :user_id
+        AND a.is_deleted = 0
+        AND a.record_time BETWEEN :start_time AND :end_time
+        AND a.record_type = :record_type
+        GROUP BY `month`, a.category_id
+        """
+    ), params).fetchall()
+
+    category_map: Dict[int, dict] = {}
+    month_category_map: Dict[Tuple[str, int], Decimal] = {}
+    for row in rows:
+        category = category_map.setdefault(row.category_id, {
+            'id': row.category_id,
+            'name': row.category_name,
+            'amount': Decimal(0),
+        })
+        category['amount'] += row.amount
+
+        month_category_map[(row.month, row.category_id)] = row.amount
+
+    sorted_categories = sorted(category_map.values(), key=lambda x: x['amount'], reverse=True)
+    top_n = 5
+    top_categories = sorted_categories[:top_n]
+    other_categories = sorted_categories[top_n:]
+
+    data = []
+    current_date = start_date
+    while current_date < end_date:
+        month = current_date.strftime('%Y%m')
+        item: dict = {
+            'month': month,
+        }
+
+        for category in top_categories:
+            item[f'category_{category["id"]}'] = \
+                month_category_map.get((month, category['id']), Decimal(0))
+
+        if other_categories:
+            item['category_0'] = Decimal(0)
+            for category in other_categories:
+                item['category_0'] += \
+                    month_category_map.get((month, category['id']), Decimal(0))
+
+        data.append(item)
+        current_date += relativedelta(months=1)
+
+    if other_categories:
+        top_categories.append({
+            'id': 0,
+            'name': 'Other',
+        })
+
+    return {
+        'categories': top_categories,
+        'data': data,
+    }
 
 
 def get_time_range(start_date: datetime, end_date: datetime):

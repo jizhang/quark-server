@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 from marshmallow import ValidationError
 
 from quark import AppError
+from quark.models.record import RecordType
 from quark.services import record as record_svc, chart as chart_svc
 from . import bp
 from .schemas.category_chart_request import category_chart_request_schema
@@ -12,6 +13,7 @@ from .schemas.category_chart_response import category_chart_response_schema
 from .schemas.investment_chart_response import investment_chart_response_schema
 from .schemas.net_capital_chart_request import net_capital_chart_request_schema
 from .schemas.net_capital_chart_response import net_capital_chart_response_schema
+from .schemas import expense_income_chart_response
 
 
 @bp.get('/min-date')
@@ -57,3 +59,31 @@ def chart_net_capital() -> Response:
 
     data = chart_svc.get_net_capital_chart(current_user.id, form['start_date'], form['end_date'])
     return net_capital_chart_response_schema.dump({'data': data})
+
+
+@bp.get('/expense')
+@login_required
+def chart_expense() -> Response:
+    try:
+        form = net_capital_chart_request_schema.load(request.args)
+    except ValidationError as e:
+        raise AppError(str(e.messages))
+
+    payload = chart_svc.get_expense_chart(current_user.id, RecordType.EXPENSE,
+                                          form['start_date'], form['end_date'])
+    payload_schema = expense_income_chart_response.create_schema(payload['categories'])
+    return payload_schema.dump(payload)
+
+
+@bp.get('/income')
+@login_required
+def chart_income() -> Response:
+    try:
+        form = net_capital_chart_request_schema.load(request.args)
+    except ValidationError as e:
+        raise AppError(str(e.messages))
+
+    payload = chart_svc.get_expense_chart(current_user.id, RecordType.INCOME,
+                                          form['start_date'], form['end_date'])
+    payload_schema = expense_income_chart_response.create_schema(payload['categories'])
+    return payload_schema.dump(payload)
