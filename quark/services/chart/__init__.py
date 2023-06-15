@@ -229,6 +229,10 @@ def get_expense_chart(user_id: int, record_type: int,
         """
     ), params).fetchall()
 
+    return make_monthly_trend(rows, start_date, end_date)
+
+
+def make_monthly_trend(rows: list, start_date: datetime, end_date: datetime) -> dict:
     category_map: Dict[int, dict] = {}
     month_category_map: Dict[Tuple[str, int], Decimal] = {}
     for row in rows:

@@ -7,6 +7,7 @@ from marshmallow import ValidationError
 from quark import AppError
 from quark.models.record import RecordType
 from quark.services import record as record_svc, chart as chart_svc
+from quark.services.chart import investment_trend as investment_trend_svc
 from . import bp
 from .schemas.category_chart_request import category_chart_request_schema
 from .schemas.category_chart_response import category_chart_response_schema
@@ -85,5 +86,19 @@ def chart_income() -> Response:
 
     payload = chart_svc.get_expense_chart(current_user.id, RecordType.INCOME,
                                           form['start_date'], form['end_date'])
+    payload_schema = expense_income_chart_response.create_schema(payload['categories'])
+    return payload_schema.dump(payload)
+
+
+@bp.get('/investment-trend')
+@login_required
+def chart_investment_trend() -> Response:
+    try:
+        form = net_capital_chart_request_schema.load(request.args)
+    except ValidationError as e:
+        raise AppError(str(e.messages))
+
+    payload = investment_trend_svc.get_investment_trend(
+        current_user.id, form['start_date'], form['end_date'])
     payload_schema = expense_income_chart_response.create_schema(payload['categories'])
     return payload_schema.dump(payload)
