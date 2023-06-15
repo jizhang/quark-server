@@ -6,8 +6,12 @@ from marshmallow import ValidationError
 
 from quark import AppError
 from quark.models.record import RecordType
-from quark.services import record as record_svc, chart as chart_svc
-from quark.services.chart import investment_trend as investment_trend_svc
+from quark.services import record as record_svc
+from quark.services.chart import (
+    category as category_chart_svc,
+    net_capital as net_capital_chart_svc,
+    category_trend as category_trend_chart_svc,
+)
 from . import bp
 from .schemas.category_chart_request import category_chart_request_schema
 from .schemas.category_chart_response import category_chart_response_schema
@@ -34,7 +38,8 @@ def chart_category() -> Response:
     except ValidationError as e:
         raise AppError(str(e.messages))
 
-    groups = chart_svc.get_category_chart(current_user.id, form['start_date'], form['end_date'])
+    groups = category_chart_svc.get_category_chart(
+        current_user.id, form['start_date'], form['end_date'])
     return category_chart_response_schema.dump({'groups': groups})
 
 
@@ -46,7 +51,8 @@ def chart_investment() -> Response:
     except ValidationError as e:
         raise AppError(str(e.messages))
 
-    payload = chart_svc.get_investment_chart(current_user.id, form['start_date'], form['end_date'])
+    payload = category_chart_svc.get_investment_chart(
+        current_user.id, form['start_date'], form['end_date'])
     return investment_chart_response_schema.dump(payload)
 
 
@@ -58,7 +64,8 @@ def chart_net_capital() -> Response:
     except ValidationError as e:
         raise AppError(str(e.messages))
 
-    data = chart_svc.get_net_capital_chart(current_user.id, form['start_date'], form['end_date'])
+    data = net_capital_chart_svc.get_net_capital_chart(
+        current_user.id, form['start_date'], form['end_date'])
     return net_capital_chart_response_schema.dump({'data': data})
 
 
@@ -70,8 +77,8 @@ def chart_expense() -> Response:
     except ValidationError as e:
         raise AppError(str(e.messages))
 
-    payload = chart_svc.get_expense_chart(current_user.id, RecordType.EXPENSE,
-                                          form['start_date'], form['end_date'])
+    payload = category_trend_chart_svc.get_expense_chart(
+        current_user.id, RecordType.EXPENSE, form['start_date'], form['end_date'])
     payload_schema = expense_income_chart_response.create_schema(payload['categories'])
     return payload_schema.dump(payload)
 
@@ -84,8 +91,8 @@ def chart_income() -> Response:
     except ValidationError as e:
         raise AppError(str(e.messages))
 
-    payload = chart_svc.get_expense_chart(current_user.id, RecordType.INCOME,
-                                          form['start_date'], form['end_date'])
+    payload = category_trend_chart_svc.get_expense_chart(
+        current_user.id, RecordType.INCOME, form['start_date'], form['end_date'])
     payload_schema = expense_income_chart_response.create_schema(payload['categories'])
     return payload_schema.dump(payload)
 
@@ -98,7 +105,7 @@ def chart_investment_trend() -> Response:
     except ValidationError as e:
         raise AppError(str(e.messages))
 
-    payload = investment_trend_svc.get_investment_trend(
+    payload = category_trend_chart_svc.get_investment_trend(
         current_user.id, form['start_date'], form['end_date'])
     payload_schema = expense_income_chart_response.create_schema(payload['categories'])
     return payload_schema.dump(payload)
