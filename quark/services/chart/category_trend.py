@@ -41,14 +41,9 @@ def get_expense_chart(user_id: int, record_type: int,
 
 
 def get_investment_trend(user_id: int, start_date: datetime, end_date: datetime) -> dict:
-    result: Dict[str, list] = {
-        'categories': [],
-        'data': [],
-    }
-
     category = category_svc.find_investment_category(user_id)
     if category is None:
-        return result
+        return make_monthly_trend([], start_date, end_date)
 
     params = {
         'user_id': user_id,

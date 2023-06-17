@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from decimal import Decimal
 from datetime import datetime
 
@@ -8,7 +9,7 @@ from quark import db, AppError
 from quark.models.account import Account
 from quark.services import account as account_svc
 from quark.services import record as record_svc
-from quark.utils import row_to_dict, rows_to_list
+from quark.utils import row_to_dict
 
 bp = Blueprint('account', __name__, url_prefix='/api/account')
 
@@ -17,14 +18,14 @@ bp = Blueprint('account', __name__, url_prefix='/api/account')
 @login_required
 def account_list() -> Response:
     rows = account_svc.get_account_list(current_user.id)
-    return jsonify(data=rows_to_list(rows))
+    return jsonify(data=[serialize_account(row) for row in rows])
 
 
 @bp.route('/get')
 @login_required
 def account_get() -> Response:
     account = check_account_id(current_user.id, request.args.get('id'))
-    return jsonify(account=row_to_dict(account))
+    return jsonify(account=serialize_account(account))
 
 
 @bp.route('/save', methods=['POST'])
@@ -50,6 +51,7 @@ def account_save() -> Response:
         raise AppError('Account name is duplicate.')
 
     account.name = form['name']
+    account.is_hidden = 1 if form['is_hidden'] else 0
 
     if account.id is None:  # Adding
         account.user_id = user_id
@@ -121,3 +123,9 @@ def check_initial_balance(form: dict) -> Decimal:
         return Decimal(form['initial_balance'])
     except Exception:
         raise AppError('Invalid initial balance')
+
+
+def serialize_account(account: Account) -> Dict[str, Any]:
+    data = row_to_dict(account)
+    data['is_hidden'] = bool(data['is_hidden'])
+    return data
