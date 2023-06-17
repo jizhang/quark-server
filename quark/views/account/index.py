@@ -1,30 +1,30 @@
 from decimal import Decimal
 from datetime import datetime
 
-from flask import Blueprint, Response, jsonify, request
+from flask import Response, jsonify, request
 from flask_login import login_required, current_user
 
 from quark import db, AppError
 from quark.models.account import Account
 from quark.services import account as account_svc
 from quark.services import record as record_svc
-from quark.utils import row_to_dict, rows_to_list
 
-bp = Blueprint('account', __name__, url_prefix='/api/account')
+from . import bp
+from .schemas.account import account_schema
 
 
 @bp.route('/list')
 @login_required
 def account_list() -> Response:
     rows = account_svc.get_account_list(current_user.id)
-    return jsonify(data=rows_to_list(rows))
+    return jsonify(data=account_schema.dump(rows, many=True))
 
 
 @bp.route('/get')
 @login_required
 def account_get() -> Response:
     account = check_account_id(current_user.id, request.args.get('id'))
-    return jsonify(account=row_to_dict(account))
+    return jsonify(account=account_schema.dump(account))
 
 
 @bp.route('/save', methods=['POST'])
@@ -50,6 +50,7 @@ def account_save() -> Response:
         raise AppError('Account name is duplicate.')
 
     account.name = form['name']
+    account.is_hidden = 1 if form['is_hidden'] else 0
 
     if account.id is None:  # Adding
         account.user_id = user_id
