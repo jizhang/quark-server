@@ -1,31 +1,30 @@
-from typing import Any, Dict
 from decimal import Decimal
 from datetime import datetime
 
-from flask import Blueprint, Response, jsonify, request
+from flask import Response, jsonify, request
 from flask_login import login_required, current_user
 
 from quark import db, AppError
 from quark.models.account import Account
 from quark.services import account as account_svc
 from quark.services import record as record_svc
-from quark.utils import row_to_dict
 
-bp = Blueprint('account', __name__, url_prefix='/api/account')
+from . import bp
+from .schemas.account import account_schema
 
 
 @bp.route('/list')
 @login_required
 def account_list() -> Response:
     rows = account_svc.get_account_list(current_user.id)
-    return jsonify(data=[serialize_account(row) for row in rows])
+    return jsonify(data=account_schema.dump(rows, many=True))
 
 
 @bp.route('/get')
 @login_required
 def account_get() -> Response:
     account = check_account_id(current_user.id, request.args.get('id'))
-    return jsonify(account=serialize_account(account))
+    return jsonify(account=account_schema.dump(account))
 
 
 @bp.route('/save', methods=['POST'])
@@ -123,9 +122,3 @@ def check_initial_balance(form: dict) -> Decimal:
         return Decimal(form['initial_balance'])
     except Exception:
         raise AppError('Invalid initial balance')
-
-
-def serialize_account(account: Account) -> Dict[str, Any]:
-    data = row_to_dict(account)
-    data['is_hidden'] = bool(data['is_hidden'])
-    return data
