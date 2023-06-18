@@ -1,8 +1,8 @@
-from decimal import Decimal
 from datetime import datetime
 
 from flask import Response, jsonify, request
 from flask_login import login_required, current_user
+from marshmallow import ValidationError
 
 from quark import db, AppError
 from quark.models.account import Account
@@ -30,34 +30,26 @@ def account_get() -> Response:
 @bp.route('/save', methods=['POST'])
 @login_required
 def account_save() -> Response:
-    form = request.get_json()
-    user_id = current_user.id
+    try:
+        form = account_schema.load(request.json)  # type: ignore
+    except ValidationError as e:
+        raise AppError(str(e.messages))
 
-    if not isinstance(form, dict):
-        raise AppError('Invalid request body')
-
-    if form.get('id'):  # Editing
-        account = check_account_id(user_id, form['id'])
+    if 'id' in form:  # Editing
+        account = account_svc.get_account(current_user.id, form['id'])
+        assert account is not None  # Validated in schema.
     else:
         account = Account()
 
-    if not form.get('name'):
-        raise AppError('Account name cannot be empty.')
-
-    # Check name collision
-    by_name = account_svc.get_account_by_name(user_id, form['name'])
-    if by_name is not None and (account.id is None or by_name.id != account.id):
-        raise AppError('Account name is duplicate.')
-
     account.name = form['name']
-    account.is_hidden = 1 if form['is_hidden'] else 0
+    account.is_hidden = form['is_hidden']
 
     if account.id is None:  # Adding
-        account.user_id = user_id
-        account.type = check_account_type(form)
-        account.initial_balance = check_initial_balance(form)
+        account.user_id = current_user.id
+        account.type = form['type']
+        account.initial_balance = form['initial_balance']
         account.balance = account.initial_balance
-        account.order_num = account_svc.get_max_order_num(user_id) + 10
+        account.order_num = account_svc.get_max_order_num(current_user.id) + 10
         account.is_deleted = 0
         account.created_at = datetime.now()
 
@@ -96,29 +88,3 @@ def check_account_id(user_id: int, account_id) -> Account:
         raise AppError('Account not found')
 
     return account
-
-
-def check_account_type(form: dict) -> int:
-    if not form.get('type'):
-        raise AppError('Account type cannot be empty.')
-
-    try:
-        account_type = int(form['type'])
-        if account_type not in (1, 2):
-            raise ValueError
-
-    except ValueError:
-        raise AppError('Invalid account type')
-
-    else:
-        return account_type
-
-
-def check_initial_balance(form: dict) -> Decimal:
-    if not form.get('initial_balance'):
-        return Decimal(0)
-
-    try:
-        return Decimal(form['initial_balance'])
-    except Exception:
-        raise AppError('Invalid initial balance')

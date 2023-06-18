@@ -13,3 +13,12 @@ class Account(db.Model):
     is_deleted = db.Column(db.Integer)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
+
+
+class AccountType:
+    ASSET = 1
+    LIABILITY = 2
+
+    @classmethod
+    def all(cls):
+        return [cls.ASSET, cls.LIABILITY]
