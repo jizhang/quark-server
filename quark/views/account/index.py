@@ -11,6 +11,7 @@ from quark.services import record as record_svc
 
 from . import bp
 from .schemas.account import account_schema
+from .schemas.account_request import account_request_schema
 
 
 @bp.route('/list')
@@ -23,7 +24,10 @@ def account_list() -> Response:
 @bp.route('/get')
 @login_required
 def account_get() -> Response:
-    account = check_account_id(current_user.id, request.args.get('id'))
+    try:
+        account = account_request_schema.load(request.args)
+    except ValidationError as e:
+        raise AppError(str(e.messages))
     return jsonify(account=account_schema.dump(account))
 
 
@@ -64,10 +68,11 @@ def account_save() -> Response:
 @bp.route('/delete', methods=['POST'])
 @login_required
 def account_delete() -> Response:
-    if request.json is None:
-        raise AppError('Invalid request body')
+    try:
+        account = account_request_schema.load(request.json)  # type: ignore
+    except ValidationError as e:
+        raise AppError(str(e.messages))
 
-    account = check_account_id(current_user.id, request.json.get('id'))
     if record_svc.exists_by_account(current_user.id, account.id):
         raise AppError('Account still has records.')
 
@@ -75,16 +80,3 @@ def account_delete() -> Response:
     account_id = account.id
     db.session.commit()
     return jsonify(id=account_id)
-
-
-def check_account_id(user_id: int, account_id) -> Account:
-    try:
-        account_id = int(account_id)
-    except ValueError:
-        raise AppError('Invalid account ID')
-
-    account = account_svc.get_account(user_id, account_id)
-    if account is None:
-        raise AppError('Account not found')
-
-    return account
