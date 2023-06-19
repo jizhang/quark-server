@@ -15,7 +15,7 @@ class RecordFormSchema(Schema):
     target_account_id = fields.Int()
     record_time = fields.DateTime(required=True)
     amount = fields.Decimal(required=True)
-    remark = fields.Str(default='')
+    remark = fields.Str(load_default='')
 
     @validates('id')
     def validate_id(self, value):

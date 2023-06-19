@@ -19,7 +19,7 @@ def get_list(user_id: int, params: ListParams) -> List[Record]:
     query = db.session.query(Record).\
         filter_by(user_id=user_id, is_deleted=0).\
         filter(Record.record_time >= params['year'].strftime('%Y-01-01 00:00:00')).\
-        filter(Record.record_type <= params['year'].strftime('%Y-12-31 23:59:59'))
+        filter(Record.record_time <= params['year'].strftime('%Y-12-31 23:59:59'))
 
     if 'record_type' in params:
         query = query.filter_by(record_type=params['record_type'])
