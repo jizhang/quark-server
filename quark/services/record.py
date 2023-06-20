@@ -12,6 +12,7 @@ class ListParams(TypedDict):
     record_type: int
     category_id: int
     account_id: int
+    keyword: str
     year: datetime
 
 
@@ -32,6 +33,9 @@ def get_list(user_id: int, params: ListParams) -> List[Record]:
             Record.account_id == params['account_id'],
             Record.target_account_id == params['account_id'],
         ))
+
+    if 'keyword' in params:
+        query = query.filter(Record.remark.contains(params['keyword']))
 
     return query.\
         order_by(Record.record_time.desc()).\

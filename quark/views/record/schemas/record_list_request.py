@@ -9,6 +9,7 @@ class RecordListRequestSchema(Schema):
     record_type = fields.Int(validate=validate.OneOf(RecordType.all()))
     category_id = fields.Int()
     account_id = fields.Int()
+    keyword = fields.Str()
     year = fields.DateTime('%Y', load_default=lambda: datetime.now())
 
 
