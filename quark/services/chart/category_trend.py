@@ -1,6 +1,7 @@
 from typing import Any, Tuple, List, Dict, TypedDict
 from decimal import Decimal
 from datetime import datetime
+from dataclasses import dataclass
 
 from sqlalchemy import text
 from dateutil.relativedelta import relativedelta
@@ -11,12 +12,12 @@ from quark.services import category as category_svc
 from . import get_time_range
 
 
+@dataclass
 class TrendRow:
-    def __init__(self, month: str, category_id: int, category_name: str, amount: Decimal):
-        self.month = month
-        self.category_id = category_id
-        self.category_name = category_name
-        self.amount = amount
+    month: str
+    category_id: int
+    category_name: str
+    amount: Decimal
 
 
 class TrendResult(TypedDict):
