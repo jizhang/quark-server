@@ -1,4 +1,4 @@
-from typing import Tuple, Dict
+from typing import Any, Tuple, List, Dict, TypedDict
 from decimal import Decimal
 from datetime import datetime
 
@@ -11,8 +11,21 @@ from quark.services import category as category_svc
 from . import get_time_range
 
 
+class TrendRow:
+    def __init__(self, month: str, category_id: int, category_name: str, amount: Decimal):
+        self.month = month
+        self.category_id = category_id
+        self.category_name = category_name
+        self.amount = amount
+
+
+class TrendResult(TypedDict):
+    categories: List[Dict[str, Any]]
+    data: List[Dict[str, Any]]
+
+
 def get_expense_chart(user_id: int, record_type: int,
-                      start_date: datetime, end_date: datetime) -> dict:
+                      start_date: datetime, end_date: datetime) -> TrendResult:
     params = {
         'user_id': user_id,
         'record_type': record_type,
@@ -20,7 +33,7 @@ def get_expense_chart(user_id: int, record_type: int,
     }
     params.update(get_time_range(start_date, end_date))
 
-    rows = db.session.execute(text(
+    rows: List[TrendRow] = db.session.execute(text(
         """
         SELECT
             DATE_FORMAT(a.record_time, '%Y%m') AS `month`
@@ -40,7 +53,7 @@ def get_expense_chart(user_id: int, record_type: int,
     return make_monthly_trend(rows, start_date, end_date)
 
 
-def get_investment_trend(user_id: int, start_date: datetime, end_date: datetime) -> dict:
+def get_investment_trend(user_id: int, start_date: datetime, end_date: datetime) -> TrendResult:
     category = category_svc.find_investment_category(user_id)
     if category is None:
         return make_monthly_trend([], start_date, end_date)
@@ -51,7 +64,7 @@ def get_investment_trend(user_id: int, start_date: datetime, end_date: datetime)
     }
     params.update(get_time_range(start_date, end_date))
 
-    rows = db.session.execute(text(
+    rows: List[TrendRow] = db.session.execute(text(
         """
         SELECT
             DATE_FORMAT(a.record_time, '%Y%m') AS `month`
@@ -71,7 +84,8 @@ def get_investment_trend(user_id: int, start_date: datetime, end_date: datetime)
     return make_monthly_trend(rows, start_date, end_date)
 
 
-def make_monthly_trend(rows: list, start_date: datetime, end_date: datetime) -> dict:
+def make_monthly_trend(rows: List[TrendRow], start_date: datetime, end_date: datetime,
+                       top_n=5) -> TrendResult:
     category_map: Dict[int, dict] = {}
     month_category_map: Dict[Tuple[str, int], Decimal] = {}
     for row in rows:
@@ -84,8 +98,7 @@ def make_monthly_trend(rows: list, start_date: datetime, end_date: datetime) -> 
 
         month_category_map[(row.month, row.category_id)] = row.amount
 
-    sorted_categories = sorted(category_map.values(), key=lambda x: x['amount'], reverse=True)
-    top_n = 5
+    sorted_categories = sorted(category_map.values(), key=lambda x: abs(x['amount']), reverse=True)
     top_categories = sorted_categories[:top_n]
     other_categories = sorted_categories[top_n:]
 
