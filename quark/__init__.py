@@ -3,6 +3,7 @@ from typing import Any, Optional, Tuple
 from flask import Flask, Response, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from marshmallow import ValidationError
 
 from . import default_settings
 
@@ -24,6 +25,14 @@ def create_app() -> Flask:
         payload = {
             'code': e.code,
             'message': e.message,
+        }
+        return jsonify(payload), 400
+
+    @app.errorhandler(ValidationError)
+    def handle_validation_error(e: ValidationError) -> Tuple[Response, int]:
+        payload = {
+            'code': 400,
+            'message': str(e),
         }
         return jsonify(payload), 400
 

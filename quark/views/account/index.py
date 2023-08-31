@@ -12,6 +12,7 @@ from quark.services import record as record_svc
 from . import bp
 from .schemas.account import account_schema
 from .schemas.account_request import account_request_schema
+from .schemas.account_move import account_move_schema
 
 
 @bp.route('/list')
@@ -80,3 +81,12 @@ def account_delete() -> Response:
     account_id = account.id
     db.session.commit()
     return jsonify(id=account_id)
+
+
+@bp.post('/move')
+@login_required
+def account_move() -> Response:
+    form = account_move_schema.load(request.json)  # type: ignore
+    account_svc.move_account(current_user.id, form['active_id'], form['over_id'])
+    db.session.commit()
+    return jsonify('ok')
