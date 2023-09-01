@@ -45,29 +45,31 @@ def get_max_order_num(user_id: int) -> int:
 
 
 def move_account(user_id: int, active_id: int, over_id: int):
-    accounts: List[Account] = db.session.scalars(
+    accounts = db.session.scalars(
         select(Account)
         .filter_by(user_id=user_id, is_deleted=0)
         .order_by(Account.order_num)
     ).all()
 
-    active_index = over_index = None
+    reordered_accounts: List[Account] = []
+    active_account = None
+    over_index = None
     for i, account in enumerate(accounts):
-        if active_index is None and account.id == active_id:
-            active_index = i
+        if active_account is None and account.id == active_id:
+            active_account = account
+            continue
+
         if over_index is None and account.id == over_id:
             over_index = i
-        if active_index is not None and over_index is not None:
-            break
 
-    if active_index is None or over_index is None:
+        reordered_accounts.append(account)
+
+    if active_account is None or over_index is None:
         return  # This should never happen.
 
-    active_account = accounts[active_index]
-    del accounts[active_index]
-    accounts.insert(over_index, active_account)
+    reordered_accounts.insert(over_index, active_account)
 
     order_num = 10
-    for account in accounts:
+    for account in reordered_accounts:
         account.order_num = order_num
         order_num += 10
