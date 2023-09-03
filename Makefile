@@ -7,7 +7,7 @@ web:
 	poetry run flask --app quark run --debug
 
 test:
-	poetry run ruff quark tests
+	poetry run ruff --fix quark tests
 	poetry run mypy quark tests
 	poetry run pytest tests
 

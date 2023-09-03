@@ -1,10 +1,16 @@
-from quark import db
+from datetime import datetime
+
+from sqlalchemy.orm import Mapped, mapped_column
+
+from . import Base
 
 
-class UserSetting(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    setting_key = db.Column(db.String)
-    setting_value_json = db.Column(db.String)
-    created_at = db.Column(db.DateTime)
-    updated_at = db.Column(db.DateTime)
+class UserSetting(Base):
+    __tablename__ = 'user_setting'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int]
+    setting_key: Mapped[str]
+    setting_value_json: Mapped[str]
+    created_at: Mapped[datetime]
+    updated_at: Mapped[datetime]

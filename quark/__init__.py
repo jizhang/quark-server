@@ -7,7 +7,7 @@ from marshmallow import ValidationError
 
 from . import default_settings
 
-db: Any = SQLAlchemy()
+db = SQLAlchemy()
 login_manager = LoginManager()
 
 

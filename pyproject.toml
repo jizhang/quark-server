@@ -12,12 +12,13 @@ gunicorn = ["gunicorn"]
 [tool.poetry.dependencies]
 python = "^3.10"
 flask = "^2.3.2"
-flask-sqlalchemy = "^3.0.3"
+flask-sqlalchemy = "^3.0.5"
 pymysql = "^1.0.3"
 flask-login = "^0.6.2"
 marshmallow = "^3.19.0"
 gunicorn = {version = "^20.1.0", optional = true}
 python-dateutil = "^2.8.2"
+sqlalchemy = "^2.0.20"
 
 [[tool.poetry.source]]
 name = "aliyun"

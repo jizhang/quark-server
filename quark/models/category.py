@@ -1,11 +1,17 @@
-from quark import db
+from datetime import datetime
+
+from sqlalchemy.orm import Mapped, mapped_column
+
+from . import Base
 
 
-class Category(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    type = db.Column(db.Integer)
-    name = db.Column(db.String)
-    is_deleted = db.Column(db.Integer)
-    created_at = db.Column(db.DateTime)
-    updated_at = db.Column(db.DateTime)
+class Category(Base):
+    __tablename__ = 'category'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int]
+    type: Mapped[int]
+    name: Mapped[str]
+    is_deleted: Mapped[int]
+    created_at: Mapped[datetime]
+    updated_at: Mapped[datetime]

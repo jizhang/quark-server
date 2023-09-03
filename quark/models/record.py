@@ -1,19 +1,26 @@
-from quark import db
+from decimal import Decimal
+from datetime import datetime
+
+from sqlalchemy.orm import Mapped, mapped_column
+
+from . import Base
 
 
-class Record(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    record_type = db.Column(db.Integer)
-    category_id = db.Column(db.Integer)
-    account_id = db.Column(db.Integer)
-    target_account_id = db.Column(db.Integer)
-    record_time = db.Column(db.DateTime)
-    amount = db.Column(db.Numeric)
-    remark = db.Column(db.String)
-    is_deleted = db.Column(db.Integer)
-    created_at = db.Column(db.DateTime)
-    updated_at = db.Column(db.DateTime)
+class Record(Base):
+    __tablename__ = 'record'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int]
+    record_type: Mapped[int]
+    category_id: Mapped[int]
+    account_id: Mapped[int]
+    target_account_id: Mapped[int]
+    record_time: Mapped[datetime]
+    amount: Mapped[Decimal]
+    remark: Mapped[str]
+    is_deleted: Mapped[int]
+    created_at: Mapped[datetime]
+    updated_at: Mapped[datetime]
 
 
 class RecordType:

@@ -1,7 +1,6 @@
-from typing import Any, Tuple, List, Dict, TypedDict
+from typing import Any, Tuple, List, Dict, TypedDict, NamedTuple, Sequence, Iterable
 from decimal import Decimal
 from datetime import datetime
-from dataclasses import dataclass
 
 from sqlalchemy import text
 from dateutil.relativedelta import relativedelta
@@ -12,8 +11,7 @@ from quark.services import category as category_svc
 from . import get_time_range
 
 
-@dataclass
-class TrendRow:
+class TrendRow(NamedTuple):
     month: str
     category_id: int
     category_name: str
@@ -34,8 +32,7 @@ def get_expense_chart(user_id: int, record_type: int,
     }
     params.update(get_time_range(start_date, end_date))
 
-    rows: List[TrendRow] = db.session.execute(text(
-        """
+    rows: Sequence[TrendRow] = db.session.execute(text("""
         SELECT
             DATE_FORMAT(a.record_time, '%Y%m') AS `month`
             ,a.category_id
@@ -49,7 +46,7 @@ def get_expense_chart(user_id: int, record_type: int,
         AND a.record_type = :record_type
         GROUP BY `month`, a.category_id
         """
-    ), params).fetchall()
+    ), params).t.all()
 
     return make_monthly_trend(rows, start_date, end_date)
 
@@ -65,7 +62,7 @@ def get_investment_trend(user_id: int, start_date: datetime, end_date: datetime)
     }
     params.update(get_time_range(start_date, end_date))
 
-    rows: List[TrendRow] = db.session.execute(text(
+    rows: Sequence[TrendRow] = db.session.execute(text(
         """
         SELECT
             DATE_FORMAT(a.record_time, '%Y%m') AS `month`
@@ -80,12 +77,12 @@ def get_investment_trend(user_id: int, start_date: datetime, end_date: datetime)
         AND a.record_time BETWEEN :start_time AND :end_time
         GROUP BY `month`, a.account_id
         """
-    ), params).fetchall()
+    ), params).t.fetchall()
 
     return make_monthly_trend(rows, start_date, end_date)
 
 
-def make_monthly_trend(rows: List[TrendRow], start_date: datetime, end_date: datetime,
+def make_monthly_trend(rows: Iterable[TrendRow], start_date: datetime, end_date: datetime,
                        top_n=5) -> TrendResult:
     category_map: Dict[int, dict] = {}
     month_category_map: Dict[Tuple[str, int], Decimal] = {}
