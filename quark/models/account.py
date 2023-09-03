@@ -1,18 +1,25 @@
-from quark import db
+from decimal import Decimal
+from datetime import datetime
+
+from sqlalchemy.orm import Mapped, mapped_column
+
+from . import Base
 
 
-class Account(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    name = db.Column(db.String)
-    type = db.Column(db.Integer)
-    initial_balance = db.Column(db.Numeric)
-    balance = db.Column(db.Numeric)
-    order_num = db.Column(db.Integer)
-    is_hidden = db.Column(db.Integer)
-    is_deleted = db.Column(db.Integer)
-    created_at = db.Column(db.DateTime)
-    updated_at = db.Column(db.DateTime)
+class Account(Base):
+    __tablename__ = 'account'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int]
+    name: Mapped[str]
+    type: Mapped[int]
+    initial_balance: Mapped[Decimal]
+    balance: Mapped[Decimal]
+    order_num: Mapped[int]
+    is_hidden: Mapped[int]
+    is_deleted: Mapped[int]
+    created_at: Mapped[datetime]
+    updated_at: Mapped[datetime]
 
 
 class AccountType:
