@@ -35,10 +35,7 @@ def account_get() -> Response:
 @bp.route('/save', methods=['POST'])
 @login_required
 def account_save() -> Response:
-    try:
-        form = account_schema.load(request.json)  # type: ignore
-    except ValidationError as e:
-        raise AppError(str(e.messages))
+    form = account_schema.load(request.get_json())
 
     if 'id' in form:  # Editing
         account = account_svc.get_account(current_user.id, form['id'])

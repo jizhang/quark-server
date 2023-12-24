@@ -2,7 +2,7 @@ from flask_login import current_user
 from marshmallow import Schema, fields, validate, validates, validates_schema, ValidationError
 
 from quark.models.account import AccountType
-from quark.services import account as account_svc
+from quark.services import account as account_svc, user as user_svc
 
 
 class AccountSchema(Schema):
@@ -23,6 +23,10 @@ class AccountSchema(Schema):
         by_name = account_svc.get_account_by_name(current_user.id, form['name'])
         if by_name is not None and ('id' not in form or by_name.id != form['id']):
             raise ValidationError('Account name is duplicate.')
+
+        if (form['is_hidden'] and 'id' in form
+            and user_svc.get_default_account_id(current_user.id) == form['id']):
+            raise ValidationError('Cannot hide default account')
 
 
 account_schema = AccountSchema()

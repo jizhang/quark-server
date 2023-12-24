@@ -2,6 +2,8 @@ import json
 from typing import Any, Optional, Union, Dict
 from datetime import datetime
 
+from sqlalchemy import select
+
 from quark import db
 from quark.models.user import User
 from quark.models.user_setting import UserSetting
@@ -30,7 +32,7 @@ def save_user_setting(user_id: int, data: Dict[str, Any]):
         filter_by(user_id=user_id).\
         all()
 
-    row_map = {row.setting_key: row for row in rows}
+    row_map = {row.setting_key: row for row in rows}  # TODO Filter valid keys
 
     for key, value in data.items():
         value_json = json.dumps(value)
@@ -43,3 +45,17 @@ def save_user_setting(user_id: int, data: Dict[str, Any]):
             row.setting_value_json = value_json
             row.created_at = datetime.now()
             db.session.add(row)
+
+
+def get_user_setting_value(user_id: int, setting_key: str):
+    value = db.session.scalar(
+        select(UserSetting.setting_value_json)
+        .filter_by(user_id=user_id, setting_key=setting_key)
+    )
+    if value is None:
+        return None
+    return json.loads(value)
+
+
+def get_default_account_id(user_id: int) -> Optional[int]:
+    return get_user_setting_value(user_id, UserSetting.DEFAULT_ACCOUNT_ID)

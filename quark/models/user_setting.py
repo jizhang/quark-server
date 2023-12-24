@@ -8,6 +8,8 @@ from . import Base
 class UserSetting(Base):
     __tablename__ = 'user_setting'
 
+    DEFAULT_ACCOUNT_ID = 'default_account_id'
+
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int]
     setting_key: Mapped[str]
