@@ -37,11 +37,7 @@ def user_setting_get() -> Response:
 
 @bp.route('/setting/save', methods=['POST'])
 def user_setting_save() -> Response:
-    try:
-        form = user_setting_schema.load(request.json)  # type: ignore
-    except ValidationError as e:
-        raise AppError(str(e.messages))
-
+    form = user_setting_schema.load(request.get_json())
     user_svc.save_user_setting(current_user.id, form)
     db.session.commit()
     return jsonify({})

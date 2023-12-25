@@ -32,7 +32,7 @@ def save_user_setting(user_id: int, data: Dict[str, Any]):
         filter_by(user_id=user_id).\
         all()
 
-    row_map = {row.setting_key: row for row in rows}  # TODO Filter valid keys
+    row_map = {row.setting_key: row for row in rows}
 
     for key, value in data.items():
         value_json = json.dumps(value)
