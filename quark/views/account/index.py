@@ -25,10 +25,7 @@ def account_list() -> Response:
 @bp.route('/get')
 @login_required
 def account_get() -> Response:
-    try:
-        account = account_request_schema.load(request.args)
-    except ValidationError as e:
-        raise AppError(str(e.messages))
+    account = account_request_schema.load(request.args)
     return jsonify(account=account_schema.dump(account))
 
 
@@ -66,10 +63,7 @@ def account_save() -> Response:
 @bp.route('/delete', methods=['POST'])
 @login_required
 def account_delete() -> Response:
-    try:
-        account = account_request_schema.load(request.json)  # type: ignore
-    except ValidationError as e:
-        raise AppError(str(e.messages))
+    account = account_request_schema.load(request.get_json())
 
     if record_svc.exists_by_account(current_user.id, account.id):
         raise AppError('Account still has records.')

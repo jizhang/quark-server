@@ -33,11 +33,7 @@ def chart_min_date() -> Response:
 @bp.get('/category')
 @login_required
 def chart_category() -> Response:
-    try:
-        form = category_chart_request_schema.load(request.args)
-    except ValidationError as e:
-        raise AppError(str(e.messages))
-
+    form = category_chart_request_schema.load(request.args)
     groups = category_chart_svc.get_category_chart(
         current_user.id, form['start_date'], form['end_date'])
     return category_chart_response_schema.dump({'groups': groups})
@@ -46,11 +42,7 @@ def chart_category() -> Response:
 @bp.get('/investment')
 @login_required
 def chart_investment() -> Response:
-    try:
-        form = category_chart_request_schema.load(request.args)
-    except ValidationError as e:
-        raise AppError(str(e.messages))
-
+    form = category_chart_request_schema.load(request.args)
     payload = category_chart_svc.get_investment_chart(
         current_user.id, form['start_date'], form['end_date'])
     return investment_chart_response_schema.dump(payload)
@@ -59,11 +51,7 @@ def chart_investment() -> Response:
 @bp.get('/net-capital')
 @login_required
 def chart_net_capital() -> Response:
-    try:
-        form = net_capital_chart_request_schema.load(request.args)
-    except ValidationError as e:
-        raise AppError(str(e.messages))
-
+    form = net_capital_chart_request_schema.load(request.args)
     data = net_capital_chart_svc.get_net_capital_chart(
         current_user.id, form['start_date'], form['end_date'])
     return net_capital_chart_response_schema.dump({'data': data})
@@ -72,11 +60,7 @@ def chart_net_capital() -> Response:
 @bp.get('/expense')
 @login_required
 def chart_expense() -> Response:
-    try:
-        form = net_capital_chart_request_schema.load(request.args)
-    except ValidationError as e:
-        raise AppError(str(e.messages))
-
+    form = net_capital_chart_request_schema.load(request.args)
     payload = category_trend_chart_svc.get_expense_chart(
         current_user.id, RecordType.EXPENSE, form['start_date'], form['end_date'])
     payload_schema = expense_income_chart_response.create_schema(payload['categories'])
@@ -86,11 +70,7 @@ def chart_expense() -> Response:
 @bp.get('/income')
 @login_required
 def chart_income() -> Response:
-    try:
-        form = net_capital_chart_request_schema.load(request.args)
-    except ValidationError as e:
-        raise AppError(str(e.messages))
-
+    form = net_capital_chart_request_schema.load(request.args)
     payload = category_trend_chart_svc.get_expense_chart(
         current_user.id, RecordType.INCOME, form['start_date'], form['end_date'])
     payload_schema = expense_income_chart_response.create_schema(payload['categories'])
@@ -100,11 +80,7 @@ def chart_income() -> Response:
 @bp.get('/investment-trend')
 @login_required
 def chart_investment_trend() -> Response:
-    try:
-        form = net_capital_chart_request_schema.load(request.args)
-    except ValidationError as e:
-        raise AppError(str(e.messages))
-
+    form = net_capital_chart_request_schema.load(request.args)
     payload = category_trend_chart_svc.get_investment_trend(
         current_user.id, form['start_date'], form['end_date'])
     payload_schema = expense_income_chart_response.create_schema(payload['categories'])

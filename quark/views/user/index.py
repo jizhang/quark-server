@@ -12,10 +12,7 @@ from .schemas.user_setting import user_setting_schema
 
 @bp.route('/login', methods=['POST'])
 def user_login() -> Response:
-    try:
-        form = login_form_schema.load(request.json)  # type: ignore
-    except ValidationError as e:
-        raise AppError(str(e.messages))
+    form = login_form_schema.load(request.get_json())
 
     user = user_svc.get_by_username(form['username'])
     if user is None:

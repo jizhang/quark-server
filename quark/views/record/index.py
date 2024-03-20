@@ -14,11 +14,7 @@ from .schemas.record_item import RecordItemSchema
 @bp.get('/list')
 @login_required
 def record_list() -> Response:
-    try:
-        form = record_list_request_schema.load(request.args)
-    except ValidationError as e:
-        raise AppError(str(e.messages))
-
+    form = record_list_request_schema.load(request.args)
     records = record_svc.get_list(current_user.id, form)
 
     schema = RecordItemSchema()

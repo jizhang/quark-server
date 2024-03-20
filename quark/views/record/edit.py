@@ -15,21 +15,14 @@ from .schemas.record_request import record_request_schema
 @bp.route('/get')
 @login_required
 def record_get() -> Response:
-    try:
-        row = record_request_schema.load(request.args)
-    except ValidationError as e:
-        raise AppError(str(e.messages))
-
+    row = record_request_schema.load(request.args)
     return jsonify(record_form_schema.dump(row))
 
 
 @bp.route('/save', methods=['POST'])
 @login_required
 def record_save() -> Response:
-    try:
-        form = record_form_schema.load(request.json)  # type: ignore
-    except ValidationError as e:
-        raise AppError(str(e.messages))
+    form = record_form_schema.load(request.get_json())
 
     if 'id' in form:
         record = record_svc.get_record(current_user.id, form['id'])
@@ -70,10 +63,7 @@ def record_save() -> Response:
 @bp.route('/delete', methods=['POST'])
 @login_required
 def record_delete() -> Response:
-    try:
-        record = record_request_schema.load(request.json)  # type: ignore
-    except ValidationError as e:
-        raise AppError(str(e.messages))
+    record = record_request_schema.load(request.get_json())
 
     record_svc.undo_record(record)
     record.is_deleted = 1
