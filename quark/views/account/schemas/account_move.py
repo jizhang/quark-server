@@ -1,5 +1,5 @@
 from flask_login import current_user
-from marshmallow import Schema, fields, validates, ValidationError
+from marshmallow import Schema, ValidationError, fields, validates
 
 from quark.services import account as account_svc
 

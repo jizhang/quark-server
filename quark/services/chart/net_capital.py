@@ -1,9 +1,9 @@
-from typing import Dict
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+from typing import Dict
 
-from sqlalchemy import text
 from dateutil.relativedelta import relativedelta
+from sqlalchemy import text
 
 from quark import db
 from quark.models.record import RecordType
@@ -24,7 +24,7 @@ def get_net_capital_chart(user_id: int, start_date: datetime, end_date: datetime
         WHERE user_id = :user_id
         AND is_deleted = 0
         GROUP BY `month`
-        """
+        """,
     ), params).fetchall()
 
     record_rows = db.session.execute(text(
@@ -37,7 +37,7 @@ def get_net_capital_chart(user_id: int, start_date: datetime, end_date: datetime
         AND record_type IN :record_types
         AND is_deleted = 0
         GROUP BY `month`
-        """
+        """,
     ), params).fetchall()
 
     amount_map: Dict[str, Decimal] = {row.month: row.initial_balance for row in account_rows}

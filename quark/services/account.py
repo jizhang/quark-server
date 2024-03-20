@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
 
 from sqlalchemy import select
 
@@ -48,7 +48,7 @@ def move_account(user_id: int, active_id: int, over_id: int):
     accounts = db.session.scalars(
         select(Account)
         .filter_by(user_id=user_id, is_deleted=0)
-        .order_by(Account.order_num)
+        .order_by(Account.order_num),
     ).all()
 
     reordered_accounts: List[Account] = []

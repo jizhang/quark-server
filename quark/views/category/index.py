@@ -1,7 +1,8 @@
 from flask import Response, jsonify
-from flask_login import login_required, current_user
+from flask_login import current_user, login_required
 
 from quark.services import category as category_svc
+
 from . import bp
 from .schemas.category import category_schema
 

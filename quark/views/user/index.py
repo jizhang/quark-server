@@ -1,10 +1,10 @@
 from flask import Response, jsonify, request
-from flask_login import login_user, current_user
+from flask_login import current_user, login_user
 from werkzeug.security import check_password_hash
-from marshmallow import ValidationError
 
-from quark import db, AppError
+from quark import AppError, db
 from quark.services import user as user_svc
+
 from . import bp
 from .schemas.login_form import login_form_schema
 from .schemas.user_setting import user_setting_schema
@@ -12,10 +12,7 @@ from .schemas.user_setting import user_setting_schema
 
 @bp.route('/login', methods=['POST'])
 def user_login() -> Response:
-    try:
-        form = login_form_schema.load(request.json)  # type: ignore
-    except ValidationError as e:
-        raise AppError(str(e.messages))
+    form = login_form_schema.load(request.get_json())
 
     user = user_svc.get_by_username(form['username'])
     if user is None:

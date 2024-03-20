@@ -1,18 +1,17 @@
 from datetime import datetime
 
 from flask import Response, jsonify, request
-from flask_login import login_required, current_user
-from marshmallow import ValidationError
+from flask_login import current_user, login_required
 
-from quark import db, AppError
+from quark import AppError, db
 from quark.models.account import Account
 from quark.services import account as account_svc
 from quark.services import record as record_svc
 
 from . import bp
 from .schemas.account import account_schema
-from .schemas.account_request import account_request_schema
 from .schemas.account_move import account_move_schema
+from .schemas.account_request import account_request_schema
 
 
 @bp.route('/list')
@@ -25,10 +24,7 @@ def account_list() -> Response:
 @bp.route('/get')
 @login_required
 def account_get() -> Response:
-    try:
-        account = account_request_schema.load(request.args)
-    except ValidationError as e:
-        raise AppError(str(e.messages))
+    account = account_request_schema.load(request.args)
     return jsonify(account=account_schema.dump(account))
 
 
@@ -66,10 +62,7 @@ def account_save() -> Response:
 @bp.route('/delete', methods=['POST'])
 @login_required
 def account_delete() -> Response:
-    try:
-        account = account_request_schema.load(request.json)  # type: ignore
-    except ValidationError as e:
-        raise AppError(str(e.messages))
+    account = account_request_schema.load(request.get_json())
 
     if record_svc.exists_by_account(current_user.id, account.id):
         raise AppError('Account still has records.')

@@ -1,12 +1,12 @@
 from datetime import datetime
 
 from flask import Response, jsonify, request
-from flask_login import login_required, current_user
-from marshmallow import ValidationError
+from flask_login import current_user, login_required
 
-from quark import db, AppError
+from quark import db
 from quark.models.record import Record, RecordType
 from quark.services import record as record_svc
+
 from . import bp
 from .schemas.record_form import record_form_schema
 from .schemas.record_request import record_request_schema
@@ -15,21 +15,14 @@ from .schemas.record_request import record_request_schema
 @bp.route('/get')
 @login_required
 def record_get() -> Response:
-    try:
-        row = record_request_schema.load(request.args)
-    except ValidationError as e:
-        raise AppError(str(e.messages))
-
+    row = record_request_schema.load(request.args)
     return jsonify(record_form_schema.dump(row))
 
 
 @bp.route('/save', methods=['POST'])
 @login_required
 def record_save() -> Response:
-    try:
-        form = record_form_schema.load(request.json)  # type: ignore
-    except ValidationError as e:
-        raise AppError(str(e.messages))
+    form = record_form_schema.load(request.get_json())
 
     if 'id' in form:
         record = record_svc.get_record(current_user.id, form['id'])
@@ -50,7 +43,7 @@ def record_save() -> Response:
         record.category_id = 0
         record.target_account_id = form['target_account_id']
     else:
-        assert False
+        raise AssertionError()
 
     record.account_id = form['account_id']
     record.record_time = form['record_time']
@@ -70,10 +63,7 @@ def record_save() -> Response:
 @bp.route('/delete', methods=['POST'])
 @login_required
 def record_delete() -> Response:
-    try:
-        record = record_request_schema.load(request.json)  # type: ignore
-    except ValidationError as e:
-        raise AppError(str(e.messages))
+    record = record_request_schema.load(request.get_json())
 
     record_svc.undo_record(record)
     record.is_deleted = 1

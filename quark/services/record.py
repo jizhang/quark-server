@@ -1,5 +1,5 @@
-from typing import Optional, List, TypedDict
 from datetime import datetime
+from typing import List, Optional, TypedDict
 
 from sqlalchemy import func, or_
 
