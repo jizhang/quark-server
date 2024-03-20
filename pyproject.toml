@@ -23,7 +23,6 @@ sqlalchemy = "^2.0.20"
 [[tool.poetry.source]]
 name = "aliyun"
 url = "https://mirrors.aliyun.com/pypi/simple/"
-priority = "default"
 
 [build-system]
 requires = ["poetry-core"]
