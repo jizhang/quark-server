@@ -18,8 +18,8 @@ class NetCapitalChartRequestSchema(Schema):
         else:
             try:
                 data['start_date'] = datetime.strptime(data['year'], '%Y')
-            except Exception:
-                raise ValidationError('Invalid year')
+            except Exception as e:
+                raise ValidationError('Invalid year') from e
 
             data['end_date'] = data['start_date'] + relativedelta(month=12, day=31)
 
