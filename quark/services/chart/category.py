@@ -1,12 +1,13 @@
-from typing import Dict
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+from typing import Dict
 
 from sqlalchemy import text
 
 from quark import db
 from quark.models.record import RecordType
 from quark.services import category as category_svc
+
 from . import get_time_range
 
 
@@ -29,7 +30,7 @@ def get_category_chart(user_id: int, start_date: datetime, end_date: datetime) -
         AND a.record_time BETWEEN :start_time AND :end_time
         AND a.is_deleted = 0
         GROUP BY a.record_type, a.category_id
-        """
+        """,
     ), params).fetchall()
 
     group_map: Dict[int, dict] = {
@@ -46,7 +47,7 @@ def get_category_chart(user_id: int, start_date: datetime, end_date: datetime) -
             'amount': Decimal(0),
             '_total_amount': Decimal(0),
             'categories': [],
-        }
+        },
     }
 
     for row in rows:
@@ -111,7 +112,7 @@ def get_investment_chart(user_id: int, start_date: datetime, end_date: datetime)
         AND a.category_id = :category_id
         AND a.is_deleted = 0
         GROUP BY a.account_id
-        """
+        """,
     ), params).fetchall()
 
     total = Decimal(0)

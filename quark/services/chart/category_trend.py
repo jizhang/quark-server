@@ -1,13 +1,14 @@
-from typing import Any, Tuple, List, Dict, TypedDict, NamedTuple, Sequence, Iterable
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+from typing import Any, Dict, Iterable, List, NamedTuple, Sequence, Tuple, TypedDict
 
-from sqlalchemy import text
 from dateutil.relativedelta import relativedelta
+from sqlalchemy import text
 
 from quark import db
 from quark.models.record import RecordType
 from quark.services import category as category_svc
+
 from . import get_time_range
 
 
@@ -45,7 +46,7 @@ def get_expense_chart(user_id: int, record_type: int,
         AND a.record_time BETWEEN :start_time AND :end_time
         AND a.record_type = :record_type
         GROUP BY `month`, a.category_id
-        """
+        """,
     ), params).t.all()
 
     return make_monthly_trend(rows, start_date, end_date)
@@ -76,7 +77,7 @@ def get_investment_trend(user_id: int, start_date: datetime, end_date: datetime)
         AND a.category_id = :category_id
         AND a.record_time BETWEEN :start_time AND :end_time
         GROUP BY `month`, a.account_id
-        """
+        """,
     ), params).t.fetchall()
 
     return make_monthly_trend(rows, start_date, end_date)

@@ -1,8 +1,8 @@
 from typing import Any, Optional, Tuple
 
 from flask import Flask, Response, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
 from marshmallow import ValidationError
 
 from . import default_settings
@@ -51,7 +51,7 @@ def configure_login_manager(app: Flask):
 
 
 def configure_views(app: Flask):
-    from .views import user, account, category, record, chart
+    from .views import account, category, chart, record, user
     app.register_blueprint(user.bp)
     app.register_blueprint(account.bp)
     app.register_blueprint(category.bp)

@@ -1,5 +1,5 @@
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
 
 from quark.services.chart import category_trend as category_trend_svc
 

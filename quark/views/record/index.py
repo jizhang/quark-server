@@ -1,14 +1,13 @@
-from flask import request, Response, jsonify
-from flask_login import login_required, current_user
-from marshmallow import ValidationError
+from flask import Response, jsonify, request
+from flask_login import current_user, login_required
 
-from quark import AppError
 from quark.services import account as account_svc
 from quark.services import category as category_svc
 from quark.services import record as record_svc
+
 from . import bp
-from .schemas.record_list_request import record_list_request_schema
 from .schemas.record_item import RecordItemSchema
+from .schemas.record_list_request import record_list_request_schema
 
 
 @bp.get('/list')

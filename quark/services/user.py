@@ -1,6 +1,6 @@
 import json
-from typing import Any, Optional, Union, Dict
 from datetime import datetime
+from typing import Any, Dict, Optional, Union
 
 from sqlalchemy import select
 
@@ -50,7 +50,7 @@ def save_user_setting(user_id: int, data: Dict[str, Any]):
 def get_user_setting_value(user_id: int, setting_key: str):
     value = db.session.scalar(
         select(UserSetting.setting_value_json)
-        .filter_by(user_id=user_id, setting_key=setting_key)
+        .filter_by(user_id=user_id, setting_key=setting_key),
     )
     if value is None:
         return None

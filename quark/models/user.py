@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy.orm import Mapped, mapped_column
 from flask_login import UserMixin
+from sqlalchemy.orm import Mapped, mapped_column
 
 from . import Base
 
